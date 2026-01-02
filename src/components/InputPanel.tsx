@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { TruthTableInput } from './TruthTableInput';
+import { InteractiveKMap } from './InteractiveKMap';
 import { InputType, parseTerms } from '@/lib/kmap-solver';
-import { Calculator, Table, Binary } from 'lucide-react';
+import { Calculator, Table, Binary, Grid3X3, MousePointerClick } from 'lucide-react';
 
 interface InputPanelProps {
   variables: number;
@@ -14,20 +15,29 @@ interface InputPanelProps {
 }
 
 export function InputPanel({ variables, onVariablesChange, onSolve }: InputPanelProps) {
-  const [inputType, setInputType] = useState<InputType>('minterms');
+  const [inputType, setInputType] = useState<InputType | 'interactive'>('interactive');
   const [mintermsInput, setMintermsInput] = useState('');
   const [maxtermsInput, setMaxtermsInput] = useState('');
   const [dontCaresInput, setDontCaresInput] = useState('');
   const [truthTableValues, setTruthTableValues] = useState<number[]>([]);
+  const [interactiveMinterms, setInteractiveMinterms] = useState<number[]>([]);
+  const [interactiveDontCares, setInteractiveDontCares] = useState<number[]>([]);
+
+  const handleInteractiveChange = useCallback((minterms: number[], dontCares: number[]) => {
+    setInteractiveMinterms(minterms);
+    setInteractiveDontCares(dontCares);
+  }, []);
 
   const handleSolve = () => {
-    const dontCares = parseTerms(dontCaresInput);
-    
-    if (inputType === 'minterms') {
+    if (inputType === 'interactive') {
+      onSolve('minterms', interactiveMinterms, interactiveDontCares);
+    } else if (inputType === 'minterms') {
       const values = parseTerms(mintermsInput);
+      const dontCares = parseTerms(dontCaresInput);
       onSolve('minterms', values, dontCares);
     } else if (inputType === 'maxterms') {
       const values = parseTerms(maxtermsInput);
+      const dontCares = parseTerms(dontCaresInput);
       onSolve('maxterms', values, dontCares);
     } else {
       const dontCareIndices = truthTableValues
@@ -52,7 +62,7 @@ export function InputPanel({ variables, onVariablesChange, onSolve }: InputPanel
               className={`flex-1 font-mono ${variables === v ? 'glow-box' : ''}`}
               onClick={() => onVariablesChange(v)}
             >
-              {v} Variables
+              {v} Var
             </Button>
           ))}
         </div>
@@ -61,32 +71,48 @@ export function InputPanel({ variables, onVariablesChange, onSolve }: InputPanel
       {/* Input type tabs */}
       <Tabs 
         value={inputType} 
-        onValueChange={(v) => setInputType(v as InputType)}
+        onValueChange={(v) => setInputType(v as InputType | 'interactive')}
         className="w-full"
       >
-        <TabsList className="w-full grid grid-cols-3 bg-secondary">
+        <TabsList className="w-full grid grid-cols-4 bg-secondary h-auto p-1">
+          <TabsTrigger 
+            value="interactive" 
+            className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <MousePointerClick className="w-4 h-4" />
+            <span className="text-xs">Click</span>
+          </TabsTrigger>
           <TabsTrigger 
             value="minterms" 
-            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             <Binary className="w-4 h-4" />
-            Minterms
+            <span className="text-xs">Minterms</span>
           </TabsTrigger>
           <TabsTrigger 
             value="maxterms"
-            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             <Calculator className="w-4 h-4" />
-            Maxterms
+            <span className="text-xs">Maxterms</span>
           </TabsTrigger>
           <TabsTrigger 
             value="truthTable"
-            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="flex flex-col items-center gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             <Table className="w-4 h-4" />
-            Truth Table
+            <span className="text-xs">Table</span>
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="interactive" className="mt-4">
+          <div className="flex justify-center">
+            <InteractiveKMap 
+              variables={variables}
+              onChange={handleInteractiveChange}
+            />
+          </div>
+        </TabsContent>
 
         <TabsContent value="minterms" className="space-y-4 mt-4">
           <div className="space-y-2">
