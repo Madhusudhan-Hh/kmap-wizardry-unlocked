@@ -1,5 +1,8 @@
 // K-Map Solver Logic
 
+export const APP_NAME = 'K-Map Wizardry';
+export const APP_VERSION = '1.0.0';
+
 export type InputType = 'minterms' | 'maxterms' | 'truthTable';
 
 export interface KMapInput {

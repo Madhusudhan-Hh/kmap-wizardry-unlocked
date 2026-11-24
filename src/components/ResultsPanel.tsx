@@ -1,6 +1,6 @@
 import { KMapGrid } from './KMapGrid';
 import { LogicGateDiagram } from './LogicGateDiagram';
-import { KMapResult } from '@/lib/kmap-solver';
+import { KMapResult, getVariableNames } from '@/lib/kmap-solver';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Grid3X3, CircuitBoard, FileCode } from 'lucide-react';
 
@@ -11,9 +11,19 @@ interface ResultsPanelProps {
 
 export function ResultsPanel({ result, variables }: ResultsPanelProps) {
   const { grid, groups, sop, pos, sopTerms } = result;
+  const varNames = getVariableNames(variables);
 
   return (
     <div className="space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+      {/* Variable info badge */}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="px-2 py-1 rounded-md bg-secondary font-mono">
+          Variables: {varNames.join(', ')} ({variables}-var K-Map)
+        </span>
+        <span className="px-2 py-1 rounded-md bg-secondary font-mono">
+          Groups: {groups.length}
+        </span>
+      </div>
       <Tabs defaultValue="kmap" className="w-full">
         <TabsList className="w-full grid grid-cols-3 bg-secondary">
           <TabsTrigger 

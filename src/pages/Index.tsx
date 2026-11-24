@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { InputPanel } from '@/components/InputPanel';
 import { ResultsPanel } from '@/components/ResultsPanel';
-import { solveKMap, InputType, KMapResult } from '@/lib/kmap-solver';
+import { solveKMap, InputType, KMapResult, APP_NAME, APP_VERSION } from '@/lib/kmap-solver';
 import { CircuitBoard, Zap } from 'lucide-react';
 
 const Index = () => {
@@ -84,8 +84,9 @@ const Index = () => {
         </div>
 
         {/* Footer */}
-        <footer className="mt-12 text-center text-sm text-muted-foreground">
+        <footer className="mt-12 text-center text-sm text-muted-foreground space-y-1">
           <p>Supports 2, 3, and 4 variable K-Maps • Automatic grouping and simplification</p>
+          <p className="text-xs opacity-60">{APP_NAME} v{APP_VERSION}</p>
         </footer>
       </div>
     </div>
